@@ -30,7 +30,7 @@ if not st.session_state.get("started", False):
 
     print("Complete initialized.")
 
-PAGES = ["user", "item", "order", "cart"]
+PAGES = ["user", "item", "cart", "order"]
 
 
 st.sidebar.title("Navigation")
@@ -51,6 +51,20 @@ def app() -> None:
         item_page(st.session_state["cart"], st.session_state["item_store"])
         return
 
+    elif selection == "cart":
+        user = st.session_state["user"]
+        if user is None:
+            st.warning("ログインが必要です")
+            return
+
+        cart_page(
+            st.session_state["cart"],
+            st.session_state["user"],
+            st.session_state["order_store"],
+            st.session_state["order_detail_store"],
+        )
+        return
+
     elif selection == "order":
         user = st.session_state["user"]
         if user is None:
@@ -62,20 +76,6 @@ def app() -> None:
             return
 
         order_page(
-            st.session_state["order_store"],
-            st.session_state["order_detail_store"],
-        )
-        return
-
-    elif selection == "cart":
-        user = st.session_state["user"]
-        if user is None:
-            st.warning("ログインが必要です")
-            return
-
-        cart_page(
-            st.session_state["cart"],
-            st.session_state["user"],
             st.session_state["order_store"],
             st.session_state["order_detail_store"],
         )
