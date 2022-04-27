@@ -1,0 +1,14 @@
+
+{
+  "recommendations": [
+    "mechatroner.rainbow-csv",
+    "nickdemayo.vscode-json-editor",
+    "pkief.material-icon-theme",
+    "editorconfig.editorconfig",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "njpwerner.autodocstring",
+    "hashicorp.terraform",
+    "christian-kohler.path-intellisense"
+  ]
+}
