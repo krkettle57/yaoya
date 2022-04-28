@@ -1,4 +1,3 @@
-import pandas as pd
 import streamlit as st
 from yaoya.models.user import User
 from yaoya.pages.base import BasePage
@@ -22,34 +21,51 @@ class OrderListPage(BasePage):
             return
 
         orders = order_repo.get_all()
-        show_order_df = pd.DataFrame(
-            [
-                {
-                    "order_id": order.order_id[-8:],
-                    "user_id": order.user_id,
-                    "total_price": order.total_price,
-                    "ordered_at": order.ordered_at.strftime("%Y-%m-%d %H:%M:%S"),
-                }
-                for order in orders
-            ]
-        )
-
+        # 注文テーブルの表示
         st.subheader("注文")
-        st.dataframe(show_order_df)
+        col_size = [1, 2, 2, 2, 4]
+        columns = st.columns(col_size)
+        headers = ["No", "注文番号", "ユーザID", "合計", "注文日付"]
+        for col, field_name in zip(columns, headers):
+            col.write(field_name)
 
-        show_order_detail_df = pd.DataFrame(
-            [
-                {
-                    "order_no": order_detail.order_no,
-                    "item_id": order_detail.item_id[-8:],
-                    "unit_price": order_detail.unit_price,
-                    "quantity": order_detail.quantity,
-                    "subtotal_price": order_detail.subtotal_price,
-                }
-                for order in orders
-                for order_detail in order.details
-            ]
-        )
+        for index, order in enumerate(orders):
+            (
+                col1,
+                col2,
+                col3,
+                col4,
+                col5,
+            ) = st.columns(col_size)
+            col1.write(index + 1)
+            col2.write(order.order_id[-8:])
+            col3.write(order.user_id)
+            col4.write(order.total_price)
+            col5.write(order.ordered_at.strftime("%Y-%m-%d %H:%M:%S"))
 
+        # 注文詳細テーブルの表示
         st.subheader("注文詳細")
-        st.dataframe(show_order_detail_df)
+        col_size = [1, 2, 2, 2, 2, 2, 2]
+        columns = st.columns(col_size)
+        headers = ["No", "注文番号", "注文No", "商品ID", "単価", "数量", "小計"]
+        for col, field_name in zip(columns, headers):
+            col.write(field_name)
+
+        for order in orders:
+            for index, order_detail in enumerate(order.details):
+                (
+                    col1,
+                    col2,
+                    col3,
+                    col4,
+                    col5,
+                    col6,
+                    col7,
+                ) = st.columns(col_size)
+                col1.write(index + 1)
+                col2.write(order.order_id[-8:])
+                col3.write(order_detail.order_no)
+                col4.write(order_detail.item_id[-8:])
+                col5.write(order_detail.unit_price)
+                col6.write(order_detail.quantity)
+                col7.write(order_detail.subtotal_price)

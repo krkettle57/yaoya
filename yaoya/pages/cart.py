@@ -1,4 +1,3 @@
-import pandas as pd
 import streamlit as st
 from yaoya.models.cart import Cart
 from yaoya.models.user import User
@@ -24,25 +23,26 @@ class CartPage(BasePage):
             st.warning("会員専用ページです")
             return
 
-        st.title("カート")
         message_box = st.empty()
-        user_name = current_user.name
 
         # カートテーブルの表示
-        show_cart_df = pd.DataFrame(
-            [
-                {
-                    "item_no": cart_item.item_no,
-                    "item_name": cart_item.item_name,
-                    "unit_price": cart_item.unit_price,
-                    "quantity": cart_item.quantity,
-                }
-                for cart_item in cart.items
-            ]
-        )
-        st.subheader("カート")
-        st.text(f"ユーザ名: {user_name}")
-        st.dataframe(show_cart_df)
+        col_size = [1, 2, 2, 2]
+        columns = st.columns(col_size)
+        headers = ["No", "商品名", "単価", "数量"]
+        for col, field_name in zip(columns, headers):
+            col.write(field_name)
+
+        for cart_item in cart.items:
+            (
+                col1,
+                col2,
+                col3,
+                col4,
+            ) = st.columns(col_size)
+            col1.write(cart_item.item_no)
+            col2.write(cart_item.item_name)
+            col3.write(cart_item.unit_price)
+            col4.write(cart_item.quantity)
 
         # 注文処理
         def on_click() -> None:

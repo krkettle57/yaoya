@@ -49,5 +49,5 @@ if not st.session_state.get("started", False):
 
 app = st.session_state.get("app", None)
 if app is not None:
-    st.set_page_config(page_title="八百屋さんEC", layout="wide", initial_sidebar_state="collapsed")
+    st.set_page_config(page_title="八百屋さんEC", layout="wide")
     app.render()
