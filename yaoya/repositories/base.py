@@ -1,16 +1,6 @@
-from typing import Any, Dict
-
-import pandas as pd
+from yaoya.exceptions import YaoyaError
 
 
-class MemoryStore:
-    def __init__(self) -> None:
-        self._df = pd.DataFrame()
-
-    @property
-    def df(self) -> pd.DataFrame:
-        return self._df
-
-    def insert(self, row: Dict[str, Any]) -> None:
-        row_df = pd.DataFrame.from_records([row])
-        self._df = pd.concat([self._df, row_df])
+class NotFoundError(YaoyaError):
+    def __init__(self, entity_id: str) -> None:
+        self.entity_id = entity_id

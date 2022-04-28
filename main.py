@@ -1,89 +1,59 @@
 import streamlit as st
 
-from yaoya.pages.cart import cart_page
-from yaoya.pages.item import item_page
-from yaoya.pages.order import order_page
-from yaoya.pages.user import user_page
-from yaoya.repositories.item import ItemMemoryStore, item_mock_insert
-from yaoya.repositories.order import OrderDetailMemoryStore, OrderMemoryStore
-from yaoya.repositories.user import UserMemoryStore, user_mock_insert
+from yaoya.models.cart import Cart
+from yaoya.pages.base import MultiPageApp
+from yaoya.pages.cart import CartPage
+from yaoya.pages.item_list import ItemListPage
+from yaoya.pages.login import LoginPage
+from yaoya.pages.order_list import OrderListPage
+from yaoya.repositories.item import ItemMemoryRepository, dummy_items_insert
+from yaoya.repositories.order import OrderMemoryRepository
+from yaoya.repositories.user import (
+    UserMemoryRepository,
+    dummy_admin_insert,
+    dummy_guest_insert,
+    dummy_owner_insert,
+    dummy_users_insert,
+)
+from yaoya.sesseion import StreamlitSessionManager, StreamlitSessionState
 
 # 初期化処理
 if not st.session_state.get("started", False):
     # store初期化
-    user_store = UserMemoryStore()
-    user_mock_insert(user_store, n=1, role="admin")
-    user_mock_insert(user_store, n=5, role="member")
+    user_repo = UserMemoryRepository()
+    dummy_admin_insert(user_repo)
+    dummy_owner_insert(user_repo)
+    dummy_users_insert(user_repo, n=5, role="member")
+    guest_user = dummy_guest_insert(user_repo)
 
-    item_store = ItemMemoryStore()
-    item_mock_insert(item_store, n=5, item_type="vegetable")
-    item_mock_insert(item_store, n=5, item_type="fruit")
+    item_repo = ItemMemoryRepository()
+    dummy_items_insert(item_repo, n=5, item_type="vegetable")
+    dummy_items_insert(item_repo, n=5, item_type="fruit")
 
     # session初期化
-    st.session_state["started"] = True
-    st.session_state["user"] = None
-    st.session_state["user_store"] = user_store
-    st.session_state["item_store"] = item_store
-    st.session_state["order_store"] = OrderMemoryStore()
-    st.session_state["order_detail_store"] = OrderDetailMemoryStore()
-    st.session_state["cart"] = None
+    ssm = StreamlitSessionManager(st.session_state)
+    sss = StreamlitSessionState(
+        started=True,
+        user=guest_user,
+        cart=Cart(guest_user.user_id),
+        user_repo=user_repo,
+        item_repo=item_repo,
+        order_repo=OrderMemoryRepository(),
+    )
+    ssm.set(sss)
 
-    print("Complete initialized.")
+    app = MultiPageApp(ssm)
+    pages = [
+        LoginPage(ssm),
+        ItemListPage(ssm),
+        CartPage(ssm),
+        OrderListPage(ssm),
+    ]
+    for page in pages:
+        app.add_page(page)
+    st.session_state["app"] = app
 
-PAGES = ["user", "item", "order", "cart"]
-
-
-st.sidebar.title("Navigation")
-selection = st.sidebar.radio("Go to", PAGES)
-
-
-def app() -> None:
-    if selection == "user":
-        user_page(st.session_state["user_store"])
-        return
-
-    elif selection == "item":
-        user = st.session_state["user"]
-        if user is None:
-            st.warning("ログインが必要です")
-            return
-
-        item_page(st.session_state["cart"], st.session_state["item_store"])
-        return
-
-    elif selection == "order":
-        user = st.session_state["user"]
-        if user is None:
-            st.warning("ログインが必要です")
-            return
-
-        if user.role != "admin":
-            st.warning("権限が足りません")
-            return
-
-        order_page(
-            st.session_state["order_store"],
-            st.session_state["order_detail_store"],
-        )
-        return
-
-    elif selection == "cart":
-        user = st.session_state["user"]
-        if user is None:
-            st.warning("ログインが必要です")
-            return
-
-        cart_page(
-            st.session_state["cart"],
-            st.session_state["user"],
-            st.session_state["order_store"],
-            st.session_state["order_detail_store"],
-        )
-        return
-
-    else:
-        st.error("予期しないエラーが発生しました")
-        return
-
-
-app()
+app = st.session_state.get("app", None)
+if app is not None:
+    st.set_page_config(page_title="八百屋さんEC", layout="wide")
+    app.render()
