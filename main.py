@@ -1,10 +1,11 @@
 import streamlit as st
 
 from yaoya.models.cart import Cart
-from yaoya.pages.cart import cart_page
-from yaoya.pages.item import item_page
-from yaoya.pages.order import order_page
-from yaoya.pages.user import user_page
+from yaoya.pages.base import MultiPageApp
+from yaoya.pages.cart import CartPage
+from yaoya.pages.item_list import ItemListPage
+from yaoya.pages.login import LoginPage
+from yaoya.pages.order_list import OrderListPage
 from yaoya.repositories.item import ItemMemoryRepository, dummy_items_insert
 from yaoya.repositories.order import OrderMemoryRepository
 from yaoya.repositories.user import UserMemoryRepository, dummy_users_insert, get_dummy_users
@@ -27,7 +28,6 @@ if not st.session_state.get("started", False):
     ssm = StreamlitSessionManager(st.session_state)
     sss = StreamlitSessionState(
         started=True,
-        page_id="login",
         user=guest_user,
         cart=Cart(guest_user.user_id),
         user_repo=user_repo,
@@ -35,60 +35,19 @@ if not st.session_state.get("started", False):
         order_repo=OrderMemoryRepository(),
     )
     ssm.set(sss)
-    print("Complete initialized.")
 
-PAGES = ["user", "item", "cart", "order"]
+    app = MultiPageApp()
+    pages = [
+        LoginPage(ssm),
+        ItemListPage(ssm),
+        CartPage(ssm),
+        OrderListPage(ssm),
+    ]
+    for page in pages:
+        app.add_page(page)
+    st.session_state["app"] = app
 
-st.set_page_config(page_title="八百屋さんEC", layout="wide", initial_sidebar_state="collapsed")
-st.sidebar.title("ページ一覧")
-selection = st.sidebar.radio("Go to", PAGES)
-
-
-def app() -> None:
-    if selection == "user":
-        user_page(st.session_state["user_repo"])
-        return
-
-    elif selection == "item":
-        user = st.session_state["user"]
-        if user is None:
-            st.warning("ログインが必要です")
-            return
-
-        item_page(st.session_state["cart"], st.session_state["item_repo"])
-        return
-
-    elif selection == "cart":
-        user = st.session_state["user"]
-        if user is None:
-            st.warning("ログインが必要です")
-            return
-
-        cart_page(
-            st.session_state["cart"],
-            st.session_state["user"],
-            st.session_state["order_repo"],
-        )
-        return
-
-    elif selection == "order":
-        user = st.session_state["user"]
-        if user is None:
-            st.warning("ログインが必要です")
-            return
-
-        if user.role != "admin":
-            st.warning("権限が足りません")
-            return
-
-        order_page(
-            st.session_state["order_repo"],
-        )
-        return
-
-    else:
-        st.error("予期しないエラーが発生しました")
-        return
-
-
-app()
+app = st.session_state.get("app", None)
+if app is not None:
+    st.set_page_config(page_title="八百屋さんEC", layout="wide", initial_sidebar_state="collapsed")
+    app.render()
