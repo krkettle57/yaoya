@@ -1,37 +1,31 @@
 import string
-from datetime import date
 from random import randint
+from typing import List
 
 from mimesis import Field, Schema
 from mimesis.locales import Locale
 from yaoya.models.user import User, UserRole
-from yaoya.repositories.base import MemoryStore
 
 
-class UserMemoryStore(MemoryStore):
+class UserMemoryRepository:
+    def __init__(self) -> None:
+        self.users: List[User] = []
+
+    def get_all(self) -> List[User]:
+        return self.users
+
     def get_by_id(self, user_id: str) -> User:
-        df = self._df
-        user = df[df["user_id"] == user_id].to_dict("records")[0]
-        return User(
-            user_id=user["user_id"],
-            name=user["name"],
-            birthday=user["birthday"],
-            email=user["email"],
-            role=user["role"],
-        )
+        users = [user for user in self.users if user.user_id == user_id]
+        if len(users) == 0:
+            raise Exception()
 
-    def insert(self, user_id: str, name: str, birthday: date, email: str, role: UserRole) -> None:
-        row = dict(
-            user_id=user_id,
-            name=name,
-            birthday=birthday,
-            email=email,
-            role=role,
-        )
-        super().insert(row)
+        return users[0]
+
+    def insert(self, user: User) -> None:
+        self.users.append(user)
 
 
-def user_mock_insert(user_store: UserMemoryStore, n: int, role: UserRole) -> None:
+def dummy_users_insert(user_repository: UserMemoryRepository, n: int, role: UserRole) -> None:
     _ = Field(locale=Locale.JA)
     schema = Schema(
         schema=lambda: {
@@ -41,5 +35,12 @@ def user_mock_insert(user_store: UserMemoryStore, n: int, role: UserRole) -> Non
             "email": _("email", domains=["sample.com"]),
         }
     )
-    for user in schema.create(n):
-        user_store.insert(user["user_id"], user["name"], user["birthday"], user["email"], role)
+    for data in schema.create(n):
+        user = User(
+            user_id=data["user_id"],
+            name=data["name"],
+            birthday=data["birthday"],
+            email=data["email"],
+            role=role,
+        )
+        user_repository.insert(user)

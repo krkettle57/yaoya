@@ -4,42 +4,41 @@ from yaoya.pages.cart import cart_page
 from yaoya.pages.item import item_page
 from yaoya.pages.order import order_page
 from yaoya.pages.user import user_page
-from yaoya.repositories.item import ItemMemoryStore, item_mock_insert
-from yaoya.repositories.order import OrderDetailMemoryStore, OrderMemoryStore
-from yaoya.repositories.user import UserMemoryStore, user_mock_insert
+from yaoya.repositories.item import ItemMemoryRepository, dummy_items_insert
+from yaoya.repositories.order import OrderMemoryRepository
+from yaoya.repositories.user import UserMemoryRepository, dummy_users_insert
 
 # 初期化処理
 if not st.session_state.get("started", False):
     # store初期化
-    user_store = UserMemoryStore()
-    user_mock_insert(user_store, n=1, role="admin")
-    user_mock_insert(user_store, n=5, role="member")
+    user_repo = UserMemoryRepository()
+    dummy_users_insert(user_repo, n=1, role="admin")
+    dummy_users_insert(user_repo, n=5, role="member")
 
-    item_store = ItemMemoryStore()
-    item_mock_insert(item_store, n=5, item_type="vegetable")
-    item_mock_insert(item_store, n=5, item_type="fruit")
+    item_repo = ItemMemoryRepository()
+    dummy_items_insert(item_repo, n=5, item_type="vegetable")
+    dummy_items_insert(item_repo, n=5, item_type="fruit")
 
     # session初期化
     st.session_state["started"] = True
     st.session_state["user"] = None
-    st.session_state["user_store"] = user_store
-    st.session_state["item_store"] = item_store
-    st.session_state["order_store"] = OrderMemoryStore()
-    st.session_state["order_detail_store"] = OrderDetailMemoryStore()
+    st.session_state["user_repo"] = user_repo
+    st.session_state["item_repo"] = item_repo
+    st.session_state["order_repo"] = OrderMemoryRepository()
     st.session_state["cart"] = None
 
     print("Complete initialized.")
 
 PAGES = ["user", "item", "cart", "order"]
 
-
+st.set_page_config(page_title="八百屋さんEC", layout="wide", initial_sidebar_state="collapsed")
 st.sidebar.title("Navigation")
 selection = st.sidebar.radio("Go to", PAGES)
 
 
 def app() -> None:
     if selection == "user":
-        user_page(st.session_state["user_store"])
+        user_page(st.session_state["user_repo"])
         return
 
     elif selection == "item":
@@ -48,7 +47,7 @@ def app() -> None:
             st.warning("ログインが必要です")
             return
 
-        item_page(st.session_state["cart"], st.session_state["item_store"])
+        item_page(st.session_state["cart"], st.session_state["item_repo"])
         return
 
     elif selection == "cart":
@@ -60,8 +59,7 @@ def app() -> None:
         cart_page(
             st.session_state["cart"],
             st.session_state["user"],
-            st.session_state["order_store"],
-            st.session_state["order_detail_store"],
+            st.session_state["order_repo"],
         )
         return
 
@@ -76,8 +74,7 @@ def app() -> None:
             return
 
         order_page(
-            st.session_state["order_store"],
-            st.session_state["order_detail_store"],
+            st.session_state["order_repo"],
         )
         return
 

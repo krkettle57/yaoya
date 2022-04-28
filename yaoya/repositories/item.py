@@ -1,35 +1,30 @@
 from random import randint
+from typing import List
 
 from mimesis import Field, Schema
 from mimesis.locales import Locale
 from yaoya.models.item import Item, ItemType
-from yaoya.repositories.base import MemoryStore
 
 
-class ItemMemoryStore(MemoryStore):
+class ItemMemoryRepository:
+    def __init__(self) -> None:
+        self.items: List[Item] = []
+
+    def get_all(self) -> List[Item]:
+        return self.items
+
     def get_by_id(self, item_id: str) -> Item:
-        df = self._df
-        item = df[df["item_id"] == item_id].to_dict("records")[0]
-        return Item(
-            item_id=item["item_id"],
-            name=item["name"],
-            price=item["price"],
-            producing_area=item["producing_area"],
-            item_type=item["item_type"],
-        )
+        items = [item for item in self.items if item.item_id == item_id]
+        if len(items) == 0:
+            raise Exception()
 
-    def insert(self, item_id: str, name: str, price: str, producing_area: str, item_type: str) -> None:
-        row = dict(
-            item_id=item_id,
-            name=name,
-            price=price,
-            producing_area=producing_area,
-            item_type=item_type,
-        )
-        super().insert(row)
+        return items[0]
+
+    def insert(self, item: Item) -> None:
+        self.items.append(item)
 
 
-def item_mock_insert(item_store: ItemMemoryStore, n: int, item_type: ItemType) -> None:
+def dummy_items_insert(item_repository: ItemMemoryRepository, n: int, item_type: ItemType) -> None:
     _ = Field(locale=Locale.JA)
     schema = Schema(
         schema=lambda: {
@@ -39,5 +34,12 @@ def item_mock_insert(item_store: ItemMemoryStore, n: int, item_type: ItemType) -
             "producing_area": _("prefecture"),
         }
     )
-    for item in schema.create(n):
-        item_store.insert(item["item_id"], item["name"], item["price"], item["producing_area"], item_type)
+    for data in schema.create(n):
+        item = Item(
+            item_id=data["item_id"],
+            name=data["name"],
+            price=data["price"],
+            producing_area=data["producing_area"],
+            item_type=item_type,
+        )
+        item_repository.insert(item)

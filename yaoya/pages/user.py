@@ -1,9 +1,9 @@
 import streamlit as st
-from yaoya.repositories.user import UserMemoryStore
+from yaoya.repositories.user import UserMemoryRepository
 from yaoya.usecases.user import login
 
 
-def user_page(user_store: UserMemoryStore) -> None:
+def user_page(user_repo: UserMemoryRepository) -> None:
     st.title("ユーザ")
     message_box = st.empty()
 
@@ -14,9 +14,9 @@ def user_page(user_store: UserMemoryStore) -> None:
     for col, field_name in zip(columns, headers):
         col.write(field_name)
 
-    for index, row in user_store.df.iterrows():
-        user_id = row["user_id"]
-        user_name = row["name"]
+    for index, user in enumerate(user_repo.get_all()):
+        user_id = user.user_id
+        user_name = user.name
         (
             col1,
             col2,
@@ -28,13 +28,13 @@ def user_page(user_store: UserMemoryStore) -> None:
         ) = st.columns(col_size)
         col1.write(index + 1)
         col2.write(user_id)
-        col3.write(row["name"])
-        col4.write(row["birthday"])
-        col5.write(row["email"])
-        col6.write(row["role"])
+        col3.write(user.name)
+        col4.write(user.birthday)
+        col5.write(user.email)
+        col6.write(user.role)
         button_col = col7.empty()
 
         # ログイン処理
         if button_col.button("ログイン", key=user_id):
-            login(user_store, user_id)
+            login(user_repo, user_id)
             message_box.info(f"{user_name} でログインしました。")

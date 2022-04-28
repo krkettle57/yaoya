@@ -1,16 +1,38 @@
+import pandas as pd
 import streamlit as st
-from yaoya.repositories.order import OrderDetailMemoryStore, OrderMemoryStore
+from yaoya.repositories.order import OrderMemoryRepository
 
 
-def order_page(order_store: OrderMemoryStore, order_detail_store: OrderDetailMemoryStore) -> None:
-    show_order_df = order_store.df.copy()
-    show_order_df["order_id"] = show_order_df["order_id"].apply(lambda x: x[-8:])
+def order_page(order_repo: OrderMemoryRepository) -> None:
+    orders = order_repo.get_all()
+    show_order_df = pd.DataFrame(
+        [
+            {
+                "order_id": order.order_id[-8:],
+                "user_id": order.user_id,
+                "total_price": order.total_price,
+                "ordered_at": order.ordered_at.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            for order in orders
+        ]
+    )
 
     st.subheader("注文")
     st.dataframe(show_order_df)
 
-    show_order_detail_df = order_detail_store.df.copy()
-    show_order_detail_df["order_id"] = show_order_detail_df["order_id"].apply(lambda x: x[-8:])
+    show_order_detail_df = pd.DataFrame(
+        [
+            {
+                "order_no": order_detail.order_no,
+                "item_id": order_detail.item_id[-8:],
+                "unit_price": order_detail.unit_price,
+                "quantity": order_detail.quantity,
+                "subtotal_price": order_detail.subtotal_price,
+            }
+            for order in orders
+            for order_detail in order.details
+        ]
+    )
 
     st.subheader("注文詳細")
     st.dataframe(show_order_detail_df)
