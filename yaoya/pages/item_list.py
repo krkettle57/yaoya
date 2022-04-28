@@ -1,3 +1,5 @@
+from typing import Any
+
 import streamlit as st
 from yaoya.models.cart import Cart
 from yaoya.models.user import User
@@ -13,7 +15,7 @@ class ItemListPage(BasePage):
         self.page_id = "item_list"
         self.ssm = ssm
 
-    def render(self) -> None:
+    def render(self, user_name_box: Any) -> None:
         cart: Cart = self.ssm.get("cart")
         current_user: User = self.ssm.get("user")
         item_repo: ItemMemoryRepository = self.ssm.get("item_repo")

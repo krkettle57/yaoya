@@ -1,3 +1,5 @@
+from typing import Any
+
 import streamlit as st
 from yaoya.models.user import User
 from yaoya.pages.base import BasePage
@@ -11,7 +13,7 @@ class OrderListPage(BasePage):
         self.page_id = "order_list"
         self.ssm = ssm
 
-    def render(self) -> None:
+    def render(self, user_name_box: Any) -> None:
         order_repo: OrderMemoryRepository = self.ssm.get("order_repo")
         current_user: User = self.ssm.get("user")
 

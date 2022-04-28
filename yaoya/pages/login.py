@@ -1,3 +1,5 @@
+from typing import Any
+
 import streamlit as st
 from yaoya.pages.base import BasePage
 from yaoya.repositories.user import UserMemoryRepository
@@ -11,7 +13,7 @@ class LoginPage(BasePage):
         self.page_id = "login"
         self.ssm = ssm
 
-    def render(self) -> None:
+    def render(self, user_name_box: Any) -> None:
         user_repo: UserMemoryRepository = self.ssm.get("user_repo")
 
         st.title(self.title)
@@ -48,3 +50,4 @@ class LoginPage(BasePage):
             if button_col.button("ログイン", key=user_id):
                 login(user_repo, user_id)
                 message_box.info(f"{user_name} でログインしました。")
+                user_name_box.text(f"ユーザ名: {user_name}")

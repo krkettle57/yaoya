@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict
 
 import streamlit as st
 from yaoya.exceptions import YaoyaError
@@ -11,7 +11,7 @@ class BasePage:
         self.page_id = page_id
         self.title = title
 
-    def render(self) -> None:
+    def render(self, user_name_box: Any) -> None:
         pass
 
 
@@ -26,14 +26,13 @@ class MultiPageApp:
 
     def render(self) -> None:
         current_user: User = self.ssm.get("user")
-        st.sidebar.write(f"ユーザ名: {current_user.name}")
-        st.sidebar.write(f"ユーザ種別: {current_user.role}")
+        user_name_box = st.sidebar.text(f"ユーザ名: {current_user.name}")
         page_id = st.sidebar.selectbox(
             self.nav_label,
             list(self.pages.keys()),
             format_func=lambda page_id: self.pages[page_id].title,
         )
         try:
-            self.pages[page_id].render()
+            self.pages[page_id].render(user_name_box)
         except YaoyaError as e:
             st.error(e)
