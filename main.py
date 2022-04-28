@@ -8,17 +8,23 @@ from yaoya.pages.login import LoginPage
 from yaoya.pages.order_list import OrderListPage
 from yaoya.repositories.item import ItemMemoryRepository, dummy_items_insert
 from yaoya.repositories.order import OrderMemoryRepository
-from yaoya.repositories.user import UserMemoryRepository, dummy_users_insert, get_dummy_users
+from yaoya.repositories.user import (
+    UserMemoryRepository,
+    dummy_admin_insert,
+    dummy_guest_insert,
+    dummy_owner_insert,
+    dummy_users_insert,
+)
 from yaoya.sesseion import StreamlitSessionManager, StreamlitSessionState
 
 # 初期化処理
 if not st.session_state.get("started", False):
     # store初期化
     user_repo = UserMemoryRepository()
-    guest_user = get_dummy_users(n=1, role="guest")[0]
-    user_repo.insert(guest_user)
-    dummy_users_insert(user_repo, n=1, role="admin")
+    dummy_admin_insert(user_repo)
+    dummy_owner_insert(user_repo)
     dummy_users_insert(user_repo, n=5, role="member")
+    guest_user = dummy_guest_insert(user_repo)
 
     item_repo = ItemMemoryRepository()
     dummy_items_insert(item_repo, n=5, item_type="vegetable")

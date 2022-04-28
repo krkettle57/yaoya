@@ -1,4 +1,5 @@
 import string
+from datetime import date
 from random import randint
 from typing import List
 
@@ -52,3 +53,21 @@ def get_dummy_users(n: int, role: UserRole) -> List[User]:
 def dummy_users_insert(user_repository: UserMemoryRepository, n: int, role: UserRole) -> None:
     for user in get_dummy_users(n, role):
         user_repository.insert(user)
+
+
+def dummy_guest_insert(user_repository: UserMemoryRepository) -> User:
+    user = User(user_id="guest", name="ゲストユーザ", birthday=date(2000, 1, 1), email="guest@sample.com", role="guest")
+    user_repository.insert(user)
+    return user
+
+
+def dummy_owner_insert(user_repository: UserMemoryRepository) -> User:
+    user = User(user_id="owner", name="オーナーユーザ", birthday=date(2000, 1, 1), email="owner@sample.com", role="owner")
+    user_repository.insert(user)
+    return user
+
+
+def dummy_admin_insert(user_repository: UserMemoryRepository) -> User:
+    user = User(user_id="admin", name="管理者ユーザ", birthday=date(2000, 1, 1), email="admin@sample.com", role="admin")
+    user_repository.insert(user)
+    return user

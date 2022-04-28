@@ -16,8 +16,8 @@ class OrderListPage(BasePage):
         current_user: User = self.ssm.get("user")
 
         st.title(self.title)
-        if current_user.role != "admin":
-            st.warning("管理者専用ページです")
+        if current_user.role not in ("owner", "admin"):
+            st.warning("オーナー専用ページです")
             return
 
         orders = order_repo.get_all()

@@ -19,7 +19,7 @@ class CartPage(BasePage):
         order_repo: OrderMemoryRepository = self.ssm.get("order_repo")
 
         st.title(self.title)
-        if current_user.role != "member":
+        if current_user.role not in ("member", "admin"):
             st.warning("会員専用ページです")
             return
 
