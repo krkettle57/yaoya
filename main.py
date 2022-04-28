@@ -36,7 +36,7 @@ if not st.session_state.get("started", False):
     )
     ssm.set(sss)
 
-    app = MultiPageApp()
+    app = MultiPageApp(ssm)
     pages = [
         LoginPage(ssm),
         ItemListPage(ssm),
