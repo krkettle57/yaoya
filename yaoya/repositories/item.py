@@ -4,6 +4,7 @@ from typing import List
 from mimesis import Field, Schema
 from mimesis.locales import Locale
 from yaoya.models.item import Item, ItemType
+from yaoya.repositories.base import NotFoundError
 
 
 class ItemMemoryRepository:
@@ -16,7 +17,7 @@ class ItemMemoryRepository:
     def get_by_id(self, item_id: str) -> Item:
         items = [item for item in self.items if item.item_id == item_id]
         if len(items) == 0:
-            raise Exception()
+            raise NotFoundError(item_id)
 
         return items[0]
 

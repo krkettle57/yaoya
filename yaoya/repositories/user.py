@@ -5,6 +5,7 @@ from typing import List
 from mimesis import Field, Schema
 from mimesis.locales import Locale
 from yaoya.models.user import User, UserRole
+from yaoya.repositories.base import NotFoundError
 
 
 class UserMemoryRepository:
@@ -17,7 +18,7 @@ class UserMemoryRepository:
     def get_by_id(self, user_id: str) -> User:
         users = [user for user in self.users if user.user_id == user_id]
         if len(users) == 0:
-            raise Exception()
+            raise NotFoundError(user_id)
 
         return users[0]
 

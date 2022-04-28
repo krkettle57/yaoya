@@ -1,6 +1,7 @@
 from typing import Dict
 
 import streamlit as st
+from yaoya.exceptions import YaoyaError
 
 
 class BasePage:
@@ -26,4 +27,7 @@ class MultiPageApp:
             list(self.pages.keys()),
             format_func=lambda page_id: self.pages[page_id].title,
         )
-        self.pages[page_id].render()
+        try:
+            self.pages[page_id].render()
+        except YaoyaError as e:
+            st.error(e)

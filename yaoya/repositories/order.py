@@ -1,6 +1,7 @@
 from typing import List
 
 from yaoya.models.order import Order
+from yaoya.repositories.base import NotFoundError
 
 
 class OrderMemoryRepository:
@@ -13,7 +14,7 @@ class OrderMemoryRepository:
     def get_by_id(self, order_id: str) -> Order:
         orders = [order for order in self.orders if order.order_id == order_id]
         if len(orders) == 0:
-            raise Exception()
+            raise NotFoundError(order_id)
 
         return orders[0]
 
