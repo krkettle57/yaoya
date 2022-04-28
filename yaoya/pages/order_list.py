@@ -1,5 +1,6 @@
 import pandas as pd
 import streamlit as st
+from yaoya.models.user import User
 from yaoya.pages.base import BasePage
 from yaoya.repositories.order import OrderMemoryRepository
 from yaoya.sesseion import StreamlitSessionManager
@@ -13,6 +14,11 @@ class OrderListPage(BasePage):
 
     def render(self) -> None:
         order_repo: OrderMemoryRepository = self.ssm.get("order_repo")
+        current_user: User = self.ssm.get("user")
+
+        if current_user.role != "admin":
+            st.warning("管理者専用ページです")
+            return
 
         orders = order_repo.get_all()
         show_order_df = pd.DataFrame(

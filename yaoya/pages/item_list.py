@@ -1,5 +1,6 @@
 import streamlit as st
 from yaoya.models.cart import Cart
+from yaoya.models.user import User
 from yaoya.pages.base import BasePage
 from yaoya.repositories.item import ItemMemoryRepository
 from yaoya.sesseion import StreamlitSessionManager
@@ -14,7 +15,12 @@ class ItemListPage(BasePage):
 
     def render(self) -> None:
         cart: Cart = self.ssm.get("cart")
+        current_user: User = self.ssm.get("user")
         item_repo: ItemMemoryRepository = self.ssm.get("item_repo")
+
+        if current_user.role != "member":
+            st.warning("会員専用ページです")
+            return
 
         st.title("商品")
         message_box = st.empty()
