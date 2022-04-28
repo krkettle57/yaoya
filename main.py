@@ -1,17 +1,21 @@
 import streamlit as st
 
+from yaoya.models.cart import Cart
 from yaoya.pages.cart import cart_page
 from yaoya.pages.item import item_page
 from yaoya.pages.order import order_page
 from yaoya.pages.user import user_page
 from yaoya.repositories.item import ItemMemoryRepository, dummy_items_insert
 from yaoya.repositories.order import OrderMemoryRepository
-from yaoya.repositories.user import UserMemoryRepository, dummy_users_insert
+from yaoya.repositories.user import UserMemoryRepository, dummy_users_insert, get_dummy_users
+from yaoya.sesseion import StreamlitSessionManager, StreamlitSessionState
 
 # 初期化処理
 if not st.session_state.get("started", False):
     # store初期化
     user_repo = UserMemoryRepository()
+    guest_user = get_dummy_users(n=1, role="guest")[0]
+    user_repo.insert(guest_user)
     dummy_users_insert(user_repo, n=1, role="admin")
     dummy_users_insert(user_repo, n=5, role="member")
 
@@ -20,19 +24,23 @@ if not st.session_state.get("started", False):
     dummy_items_insert(item_repo, n=5, item_type="fruit")
 
     # session初期化
-    st.session_state["started"] = True
-    st.session_state["user"] = None
-    st.session_state["user_repo"] = user_repo
-    st.session_state["item_repo"] = item_repo
-    st.session_state["order_repo"] = OrderMemoryRepository()
-    st.session_state["cart"] = None
-
+    ssm = StreamlitSessionManager(st.session_state)
+    sss = StreamlitSessionState(
+        started=True,
+        page_id="login",
+        user=guest_user,
+        cart=Cart(guest_user.user_id),
+        user_repo=user_repo,
+        item_repo=item_repo,
+        order_repo=OrderMemoryRepository(),
+    )
+    ssm.set(sss)
     print("Complete initialized.")
 
 PAGES = ["user", "item", "cart", "order"]
 
 st.set_page_config(page_title="八百屋さんEC", layout="wide", initial_sidebar_state="collapsed")
-st.sidebar.title("Navigation")
+st.sidebar.title("ページ一覧")
 selection = st.sidebar.radio("Go to", PAGES)
 
 

@@ -24,7 +24,7 @@ class ItemMemoryRepository:
         self.items.append(item)
 
 
-def dummy_items_insert(item_repository: ItemMemoryRepository, n: int, item_type: ItemType) -> None:
+def get_dummy_items(n: int, item_type: ItemType) -> List[Item]:
     _ = Field(locale=Locale.JA)
     schema = Schema(
         schema=lambda: {
@@ -34,12 +34,19 @@ def dummy_items_insert(item_repository: ItemMemoryRepository, n: int, item_type:
             "producing_area": _("prefecture"),
         }
     )
-    for data in schema.create(n):
-        item = Item(
+    items = [
+        Item(
             item_id=data["item_id"],
             name=data["name"],
             price=data["price"],
             producing_area=data["producing_area"],
             item_type=item_type,
         )
+        for data in schema.create(n)
+    ]
+    return items
+
+
+def dummy_items_insert(item_repository: ItemMemoryRepository, n: int, item_type: ItemType) -> None:
+    for item in get_dummy_items(n, item_type):
         item_repository.insert(item)

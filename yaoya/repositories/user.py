@@ -25,7 +25,7 @@ class UserMemoryRepository:
         self.users.append(user)
 
 
-def dummy_users_insert(user_repository: UserMemoryRepository, n: int, role: UserRole) -> None:
+def get_dummy_users(n: int, role: UserRole) -> List[User]:
     _ = Field(locale=Locale.JA)
     schema = Schema(
         schema=lambda: {
@@ -35,12 +35,19 @@ def dummy_users_insert(user_repository: UserMemoryRepository, n: int, role: User
             "email": _("email", domains=["sample.com"]),
         }
     )
-    for data in schema.create(n):
-        user = User(
+    users = [
+        User(
             user_id=data["user_id"],
             name=data["name"],
             birthday=data["birthday"],
             email=data["email"],
             role=role,
         )
+        for data in schema.create(n)
+    ]
+    return users
+
+
+def dummy_users_insert(user_repository: UserMemoryRepository, n: int, role: UserRole) -> None:
+    for user in get_dummy_users(n, role):
         user_repository.insert(user)
