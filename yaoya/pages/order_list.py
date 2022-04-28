@@ -16,6 +16,7 @@ class OrderListPage(BasePage):
         order_repo: OrderMemoryRepository = self.ssm.get("order_repo")
         current_user: User = self.ssm.get("user")
 
+        st.title(self.title)
         if current_user.role != "admin":
             st.warning("管理者専用ページです")
             return

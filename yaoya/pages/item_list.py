@@ -18,6 +18,7 @@ class ItemListPage(BasePage):
         current_user: User = self.ssm.get("user")
         item_repo: ItemMemoryRepository = self.ssm.get("item_repo")
 
+        st.title(self.title)
         if current_user.role != "member":
             st.warning("会員専用ページです")
             return

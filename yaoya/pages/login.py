@@ -14,7 +14,7 @@ class LoginPage(BasePage):
     def render(self) -> None:
         user_repo: UserMemoryRepository = self.ssm.get("user_repo")
 
-        st.title("ユーザ")
+        st.title(self.title)
         message_box = st.empty()
 
         # ユーザテーブルの表示
